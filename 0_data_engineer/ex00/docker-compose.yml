@@ -2,7 +2,7 @@
 services:
   postgres:
     image: postgres:15
-    container_name: piscineds-ex00
+    container_name: piscineds
     environment:
       - POSTGRES_USER=mdesmart
       - POSTGRES_PASSWORD=mysecretpassword
