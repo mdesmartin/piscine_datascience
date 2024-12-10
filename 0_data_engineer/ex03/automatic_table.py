@@ -27,21 +27,25 @@ def configure_database():
 
 def create_tables(engine, base, table_name):
     """Create the table in the database."""
-
-    class DataModel(base):
-        __tablename__ = table_name
-        event_time = Column(DateTime, nullable=False)
-        event_type = Column(String, nullable=False)
-        product_id = Column(Integer, nullable=False)
-        price = Column(Float, nullable=False)
-        user_id = Column(BigInteger, nullable=False)
-        user_session = Column(UUID(as_uuid=True), nullable=False)
-
-        __table_args__ = (
-            PrimaryKeyConstraint('event_time', 'event_type', 'product_id',
-                                 'price', 'user_id', 'user_session',
-                                 name=f'{table_name}_pkey'),
-        )
+    DataModel = type(
+        f"DataModel_{table_name}",
+        (base,),
+        {
+            '__tablename__': table_name,
+            'event_time': Column(DateTime, nullable=False),
+            'event_type': Column(String, nullable=False),
+            'product_id': Column(Integer, nullable=False),
+            'price': Column(Float, nullable=False),
+            'user_id': Column(BigInteger, nullable=False),
+            'user_session': Column(UUID(as_uuid=True), nullable=False),
+            '__table_args__': (
+                PrimaryKeyConstraint(
+                    'event_time', 'event_type', 'product_id', 'price',
+                    'user_id', 'user_session', name=f'{table_name}_pkey'
+                ),
+            )
+        }
+    )
 
     base.metadata.create_all(bind=engine)
     return DataModel
@@ -77,7 +81,7 @@ def main():
     engine, base, session_local = configure_database()
     session = session_local()
 
-    folder_path = 'customer'  # Folder containing the CSV files
+    folder_path = './'
     csv_files = [f for f in os.listdir(folder_path) if f.endswith('.csv')]
 
     for csv_file in csv_files:
