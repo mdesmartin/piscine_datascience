@@ -15,7 +15,6 @@ DB_NAME = 'piscineds'
 def configure_database():
     """Configure the database connection and return the engine,
      base, and session factory."""
-    # db_url = f'postgresql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}'
     db_url = (
         f'postgresql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/'
         f'{DB_NAME}'
