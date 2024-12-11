@@ -1,6 +1,7 @@
 import psycopg2
 
 def create_connection():
+    """create a database connection to a SQLite database"""
     return psycopg2.connect(
         dbname="piscineds",
         user="mdesmart",
@@ -10,6 +11,7 @@ def create_connection():
     )
 
 def create_table(cursor):
+    """create a table in the database"""
     cursor.execute("""
     DROP TABLE IF EXISTS data_2022_oct;
 
@@ -24,6 +26,7 @@ def create_table(cursor):
     """)
 
 def copy_data_from_csv(cursor, file_path):
+    """copy data from csv file"""
     with open(file_path, 'r') as f:
         next(f)
         cursor.copy_from(f, 'data_2022_oct', sep=',', null='')
@@ -33,7 +36,7 @@ def main():
     cursor = connection.cursor()
 
     create_table(cursor)
-    copy_data_from_csv(cursor, '../../../customer/data_2022_oct.csv')
+    copy_data_from_csv(cursor, '../../customer/data_2022_oct.csv')
 
     connection.commit()
     cursor.close()

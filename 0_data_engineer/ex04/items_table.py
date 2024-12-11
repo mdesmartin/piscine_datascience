@@ -1,6 +1,7 @@
 import psycopg2
 
 def create_connection():
+    """create a database connection to a SQLite database"""
     return psycopg2.connect(
         dbname="piscineds",
         user="mdesmart",
@@ -10,6 +11,7 @@ def create_connection():
     )
 
 def create_table(cursor):
+    """create a table in the database"""
     cursor.execute("""
     DROP TABLE IF EXISTS items;
 
@@ -22,6 +24,7 @@ def create_table(cursor):
     """)
 
 def create_temp_table(cursor):
+    """create a temporary table in the database"""
     cursor.execute("""
     DROP TABLE IF EXISTS temp_items;
 
@@ -34,11 +37,13 @@ def create_temp_table(cursor):
     """)
 
 def copy_data_from_csv(cursor, file_path):
+    """copy data from csv file"""
     with open(file_path, 'r') as f:
         next(f)
         cursor.copy_from(f, 'temp_items', sep=',', null='')
 
 def remove_duplicates_and_insert(cursor):
+    """remove duplicates and insert into table"""
     cursor.execute("""
     INSERT INTO items
     SELECT DISTINCT ON (product_id) *
@@ -52,7 +57,7 @@ def main():
 
     create_table(cursor)
     create_temp_table(cursor)
-    copy_data_from_csv(cursor, '../../../item/item.csv')
+    copy_data_from_csv(cursor, '../../item/item.csv')
     remove_duplicates_and_insert(cursor)
 
     connection.commit()
