@@ -30,7 +30,7 @@ def create_tables(engine, base, table_name):
         category_code = Column(BigInteger, nullable=True)
         brand = Column(String, nullable=True)
         __table_args__ = (
-            PrimaryKeyConstraint('product_id', 'category_id', 'category_code', 'brand', name=f'{table_name}_pkey'),
+            PrimaryKeyConstraint('product_id', name=f'{table_name}_pkey'),
         )
 
     base.metadata.create_all(bind=engine)
@@ -45,8 +45,8 @@ def load_and_validate_csv(file_path):
     df['brand'] = df['brand'].astype(str)
 
     df.dropna(subset=['product_id'], inplace=True)
-    df.drop_duplicates(subset=['product_id', 'category_id', 'category_code', 'brand'], inplace=True)
-
+    df.drop_duplicates(subset=['product_id'], inplace=True)
+    # df.drop_duplicates(inplace=True)
     df.replace({pd.NA: None}, inplace=True)
 
     return df

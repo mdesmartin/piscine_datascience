@@ -48,12 +48,19 @@ def create_tables(engine, base, table_name):
     return DataModel
 
 def load_and_validate_csv(file_path):
-    """Load and validate the CSV file, removing duplicates based on the 6 columns."""
     df = pd.read_csv(file_path)
+
     df['event_time'] = pd.to_datetime(df['event_time'], errors='coerce')
-    df = df.dropna(subset=['event_time', 'event_type', 'product_id', 'price', 'user_id', 'user_session'])
-    df = df[df['event_time'].notnull()]
-    df = df.drop_duplicates(subset=['event_time', 'event_type', 'product_id', 'price', 'user_id', 'user_session'])
+    df['event_type'] = df['event_type'].astype(str)
+    df['product_id'] = pd.to_numeric(df['product_id'], errors='coerce').astype('Int32')
+    df['price'] = pd.to_numeric(df['price'], errors='coerce')
+    df['user_id'] = pd.to_numeric(df['user_id'], errors='coerce').astype('Int64')
+    df['user_session'] = df['user_session'].apply(
+        lambda val: uuid.UUID(val) if isinstance(val, str) and len(val) == 36 else None
+    )
+
+    df.dropna(subset=['event_time', 'event_type', 'product_id', 'price', 'user_id', 'user_session'], inplace=True)
+    df.drop_duplicates(subset=['event_time', 'event_type', 'product_id', 'price', 'user_id', 'user_session'], inplace=True)
     return df
 
 def insert_data(session, df, data_model):
@@ -66,7 +73,7 @@ def insert_data(session, df, data_model):
             product_id=row['product_id'],
             price=row['price'],
             user_id=row['user_id'],
-            user_session=uuid.UUID(row['user_session'])
+            user_session=row['user_session']
         )
         data_list.append(data)
     session.bulk_save_objects(data_list)
@@ -84,7 +91,7 @@ def main():
     engine, base, session_local = configure_database()
     session = session_local()
 
-    folder_path = './'
+    folder_path = '../../../subject/customer/'
     csv_files = [f for f in os.listdir(folder_path) if f.endswith('.csv')]
 
     for csv_file in csv_files:

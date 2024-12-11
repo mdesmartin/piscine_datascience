@@ -82,7 +82,7 @@ def main():
     engine, base, session_local = configure_database()
     session = session_local()
 
-    csv_file = '../../../subject/customer/data_2022_oct.csv'  # Specify the CSV file path
+    csv_file = '../../../subject/customer/data_2022_oct.csv'
     table_name = 'data_2022_oct'
 
     print(f"Starting database configuration: {format_time(time.time() - start_time)}")
