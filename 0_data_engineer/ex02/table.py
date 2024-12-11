@@ -34,7 +34,7 @@ def create_tables(engine, base, table_name):
         __table_args__ = (
             PrimaryKeyConstraint('event_time', 'event_type', 'product_id', 'price', 'user_id', 'user_session', name=f'{table_name}_pkey'),
         )
-
+    DataModel.__table__.drop(bind=engine, checkfirst=True)
     base.metadata.create_all(bind=engine)
     return DataModel
 
@@ -87,16 +87,10 @@ def main():
 
     print(f"Starting database configuration: {format_time(time.time() - start_time)}")
     data_model = create_tables(engine, base, table_name)
-    print(f"Tables created: {format_time(time.time() - start_time)}")
-
     print(f"Loading and validating CSV: {format_time(time.time() - start_time)}")
     df = load_and_validate_csv(csv_file)
-    print(f"CSV loaded and validated: {format_time(time.time() - start_time)}")
-
     print(f"Inserting data into database: {format_time(time.time() - start_time)}")
     insert_data(session, df, data_model)
-    print(f"Data inserted: {format_time(time.time() - start_time)}")
-
     session.close()
     print(f"Session closed: {format_time(time.time() - start_time)}")
 

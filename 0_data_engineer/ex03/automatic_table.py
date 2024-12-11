@@ -43,7 +43,7 @@ def create_tables(engine, base, table_name):
             )
         }
     )
-
+    DataModel.__table__.drop(bind=engine, checkfirst=True)
     base.metadata.create_all(bind=engine)
     return DataModel
 
