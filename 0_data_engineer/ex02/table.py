@@ -1,3 +1,4 @@
+import sys
 import pandas as pd
 from sqlalchemy import create_engine, Column, DateTime, Integer, BigInteger, String, Float
 from sqlalchemy.dialects.postgresql import UUID
@@ -15,11 +16,15 @@ DB_NAME = 'piscineds'
 
 def configure_database():
     """Configure the database connection and return the engine, base, and session factory."""
-    db_url = f'postgresql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}'
-    engine = create_engine(db_url)
-    base = declarative_base()
-    session_local = sessionmaker(autocommit=False, autoflush=False, bind=engine)
-    return engine, base, session_local
+    try:
+        db_url = f'postgresql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}'
+        engine = create_engine(db_url)
+        base = declarative_base()
+        session_local = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+        return engine, base, session_local
+    except Exception as e:
+        print(f"Error: {e}")
+        sys.exit(1)
 
 def create_tables(engine, base, table_name):
     """Create the table in the database."""
@@ -39,7 +44,11 @@ def create_tables(engine, base, table_name):
     return DataModel
 
 def load_and_validate_csv(file_path):
-    df = pd.read_csv(file_path)
+    try:
+        df = pd.read_csv(file_path)
+    except Exception as e:
+        print(f"Error: {e}")
+        sys.exit(1)
 
     df['event_time'] = pd.to_datetime(df['event_time'], errors='coerce')
     df['event_type'] = df['event_type'].astype(str)
@@ -52,23 +61,30 @@ def load_and_validate_csv(file_path):
 
     df.dropna(subset=['event_time', 'event_type', 'product_id', 'price', 'user_id', 'user_session'], inplace=True)
     df.drop_duplicates(subset=['event_time', 'event_type', 'product_id', 'price', 'user_id', 'user_session'], inplace=True)
+
+    assert not df.empty, "DataFrame is empty"
     return df
 
 def insert_data(session, df, data_model):
     """Insert the validated data into the database using bulk insert."""
-    data_list = []
-    for index, row in df.iterrows():
-        data = data_model(
-            event_time=row['event_time'],
-            event_type=row['event_type'],
-            product_id=row['product_id'],
-            price=row['price'],
-            user_id=row['user_id'],
-            user_session=row['user_session']
-        )
-        data_list.append(data)
-    session.bulk_save_objects(data_list)
-    session.commit()
+    try:
+        data_list = []
+        for index, row in df.iterrows():
+            data = data_model(
+                event_time=row['event_time'],
+                event_type=row['event_type'],
+                product_id=row['product_id'],
+                price=row['price'],
+                user_id=row['user_id'],
+                user_session=row['user_session']
+            )
+            data_list.append(data)
+        session.bulk_save_objects(data_list)
+        session.commit()
+    except Exception as e:
+        session.rollback()
+        print(f"Error: {e}")
+        sys.exit(1)
 
 def format_time(seconds):
     """Format the elapsed time in minutes and seconds."""
