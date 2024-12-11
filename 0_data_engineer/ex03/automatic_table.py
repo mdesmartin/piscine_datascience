@@ -8,7 +8,6 @@ import uuid
 import time
 from datetime import timedelta
 
-# Database configuration
 DB_USER = 'mdesmart'
 DB_PASSWORD = 'mysecretpassword'
 DB_HOST = 'localhost'
