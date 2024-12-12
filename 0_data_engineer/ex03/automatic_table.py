@@ -37,7 +37,7 @@ def main():
     connection = create_connection()
     cursor = connection.cursor()
 
-    csv_files = glob.glob(os.path.join('../../customer', '*.csv'))
+    csv_files = glob.glob(os.path.join('../../../subject/customer', '*.csv'))
 
     for csv_file in csv_files:
         table_name = os.path.splitext(os.path.basename(csv_file))[0]
