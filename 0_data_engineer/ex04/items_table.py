@@ -57,7 +57,7 @@ def main():
 
     create_table(cursor)
     create_temp_table(cursor)
-    copy_data_from_csv(cursor, '../../item/item.csv')
+    copy_data_from_csv(cursor, '../../../item/item.csv')
     remove_duplicates_and_insert(cursor)
 
     connection.commit()
